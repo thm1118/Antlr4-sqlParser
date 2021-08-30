@@ -10,9 +10,9 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <antlr4.verson>4.5.3</antlr4.verson>
+        <antlr4.verson>4.9.2</antlr4.verson>
         <!--<antlr4.verson>4.7</antlr4.verson>-->
-        <antlr4-runtime.verson>4.5.3</antlr4-runtime.verson>
+        <antlr4-runtime.verson>4.9.2</antlr4-runtime.verson>
         <!--<antlr4-runtime.verson>4.7</antlr4-runtime.verson>-->
     </properties>
 
@@ -24,7 +24,8 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
-            <version>${antlr4.verson}</version>
+            <version>4.9.2</version>
+<!--            <version>${antlr4.verson}</version>-->
         </dependency>
 
 
@@ -71,7 +72,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.5.3</version>
+                <version>4.9.2</version>
                 <!--<version>4.7</version>-->
                 <executions>
                     <execution>
