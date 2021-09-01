@@ -14,6 +14,7 @@
         <!--<antlr4.verson>4.7</antlr4.verson>-->
         <antlr4-runtime.verson>4.9.2</antlr4-runtime.verson>
         <!--<antlr4-runtime.verson>4.7</antlr4-runtime.verson>-->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
 
@@ -25,7 +26,7 @@
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
             <version>4.9.2</version>
-<!--            <version>${antlr4.verson}</version>-->
+            <!--            <version>${antlr4.verson}</version>-->
         </dependency>
 
 
@@ -41,17 +42,17 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>25.0-jre</version>
+            <version>30.1.1-jre</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.2</version>
+            <scope>test</scope>
         </dependency>
 
 
     </dependencies>
-
 
 
     <build>
@@ -60,35 +61,108 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
             </plugin>
 
-
-
             <plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.9.2</version>
-                <!--<version>4.7</version>-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
-                        <id>antlr</id>
+                        <id>resources</id>
                         <goals>
-                            <goal>antlr4</goal>
+                            <goal>testResources</goal>
                         </goals>
-                        <phase>none</phase>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
                 <configuration>
-                    <outputDirectory>src/test/java</outputDirectory>
-                    <listener>true</listener>
-                    <treatWarningsAsErrors>true</treatWarningsAsErrors>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <executions>
+                    <execution>
+                        <id>surefire</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>test</phase>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>3.0.0-M5</version>
+
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.1</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+
+            <!--            <plugin>-->
+            <!--                <groupId>org.antlr</groupId>-->
+            <!--                <artifactId>antlr4-maven-plugin</artifactId>-->
+            <!--                <version>4.9.2</version>-->
+            <!--                &lt;!&ndash;<version>4.7</version>&ndash;&gt;-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>antlr</id>-->
+            <!--                        <goals>-->
+            <!--                            <goal>antlr4</goal>-->
+            <!--                        </goals>-->
+            <!--                        <phase>none</phase>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <configuration>-->
+            <!--                    <outputDirectory>src/test/java</outputDirectory>-->
+            <!--                    <listener>true</listener>-->
+            <!--                    <treatWarningsAsErrors>true</treatWarningsAsErrors>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
         </plugins>
     </build>
 

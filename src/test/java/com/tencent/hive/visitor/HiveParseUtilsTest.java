@@ -1,6 +1,7 @@
 package com.tencent.hive.visitor;
 
 import com.tencent.spark.listener.utils.SparkSqlUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -11,8 +12,10 @@ import static org.junit.Assert.*;
 /**
  * Created by lcc on 2018/12/17.
  */
+
 public class HiveParseUtilsTest {
-    @Test
+//    @Test
+    @Ignore
     public void parseTable() throws Exception {
 
         //        String query = "SELECT LastName,FirstName FROM Persons;";
@@ -27,7 +30,8 @@ public class HiveParseUtilsTest {
     }
 
 
-    @Test
+//    @Test
+    @Ignore
     public void parseTable1() throws Exception {
         String sql = "insert into table_a (id,name ) select a.id,b.name  from a inner join b on a.id =b.id ";
         HiveParseUtils.parseTable(sql);

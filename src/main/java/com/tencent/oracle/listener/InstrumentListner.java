@@ -10,13 +10,19 @@ import com.tencent.oracle.out.PlSqlParser;
 public class InstrumentListner extends PlSqlParserBaseListener {
     public TokenStreamRewriter rewriter;
     TokenStream tokens;
-    // todo: 这里为了演示插桩用了文字，需要设计 覆盖率数据声明头，结尾，增量计数器（语句、分支、函数（含存储过程、触发器等））
-    private String coverageDeclare = "/*注入的覆盖率数据存储，计数器等的声明头 */\n";
-    private String coverageEnd = "/*注入的覆盖率计数器最后收尾动作，比如汇总？ */\n";
-    private String coverageIncrementor = "/*注入的增量计数器*/ \n";
 
-    public InstrumentListner(TokenStream tokens){
+    private final String coverageDeclare;
+    private final String coverageEnd;
+    private final String coverageStatementIncrementor;
+    private final String coverageBranchIncrementor;
+
+    public InstrumentListner(TokenStream tokens, String coverageDeclare, String coverageEnd,
+                             String coverageStatementIncrementor, String coverageBranchIncrementor){
         this.tokens = tokens;
+        this.coverageDeclare = coverageDeclare;
+        this.coverageEnd = coverageEnd;
+        this.coverageStatementIncrementor = coverageStatementIncrementor;
+        this.coverageBranchIncrementor = coverageBranchIncrementor;
         this.rewriter = new TokenStreamRewriter(tokens);
     }
 
@@ -28,13 +34,17 @@ public class InstrumentListner extends PlSqlParserBaseListener {
         rewriter.insertAfter(ctx.getStop(), coverageEnd);
     }
 
-    private void instrumentCoverageIncrement(ParserRuleContext ctx) {
-        rewriter.insertBefore(ctx.getStart(), coverageIncrementor);
+    private void instrumentCoverageStatementIncrement(ParserRuleContext ctx) {
+        rewriter.insertBefore(ctx.getStart(), coverageStatementIncrementor);
+    }
+
+    private void instrumentCoverageBranchIncrement(ParserRuleContext ctx) {
+        rewriter.insertBefore(ctx.getStart(), coverageBranchIncrementor);
     }
 
     @Override
     public void exitSql_script(PlSqlParser.Sql_scriptContext ctx){
-        super.enterSql_script(ctx);
+        super.exitSql_script(ctx);
         instrumentCoverageDeclare(ctx);
         instrumentCoverageEnd(ctx);
     }
@@ -42,12 +52,30 @@ public class InstrumentListner extends PlSqlParserBaseListener {
     @Override
     public void enterUnit_statement(PlSqlParser.Unit_statementContext ctx) {
         super.enterUnit_statement(ctx);
-        instrumentCoverageIncrement(ctx);
+        instrumentCoverageStatementIncrement(ctx);
     }
 
     @Override
     public void enterStatement(PlSqlParser.StatementContext ctx) {
         super.enterStatement(ctx);
-        instrumentCoverageIncrement(ctx);
+        instrumentCoverageStatementIncrement(ctx);
+    }
+
+    @Override
+    public void enterIf_statement(PlSqlParser.If_statementContext ctx) {
+        super.enterIf_statement(ctx);
+        instrumentCoverageBranchIncrement(ctx);
+    }
+
+    @Override
+    public void enterElsif_part(PlSqlParser.Elsif_partContext ctx) {
+        super.enterElsif_part(ctx);
+        instrumentCoverageBranchIncrement(ctx);
+    }
+
+    @Override
+    public void enterElse_part(PlSqlParser.Else_partContext ctx) {
+        super.enterElse_part(ctx);
+        instrumentCoverageBranchIncrement(ctx);
     }
 }
