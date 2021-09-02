@@ -1,5 +1,6 @@
 package com.tencent.oracle.listener;
 
+import com.tencent.oracle.config.CoverageDataConfig;
 import com.tencent.oracle.out.PlSqlParserBaseListener;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.TokenStream;
@@ -11,35 +12,31 @@ public class InstrumentListner extends PlSqlParserBaseListener {
     public TokenStreamRewriter rewriter;
     TokenStream tokens;
 
-    private final String coverageDeclare;
-    private final String coverageEnd;
-    private final String coverageStatementIncrementor;
-    private final String coverageBranchIncrementor;
+    CoverageDataConfig coverageDataConfig;
 
-    public InstrumentListner(TokenStream tokens, String coverageDeclare, String coverageEnd,
-                             String coverageStatementIncrementor, String coverageBranchIncrementor){
+    public InstrumentListner(TokenStream tokens, CoverageDataConfig coverageDataConfig){
         this.tokens = tokens;
-        this.coverageDeclare = coverageDeclare;
-        this.coverageEnd = coverageEnd;
-        this.coverageStatementIncrementor = coverageStatementIncrementor;
-        this.coverageBranchIncrementor = coverageBranchIncrementor;
+        this.coverageDataConfig = coverageDataConfig;
         this.rewriter = new TokenStreamRewriter(tokens);
     }
 
     private void instrumentCoverageDeclare(ParserRuleContext ctx) {
-        rewriter.insertBefore(ctx.getStart(), coverageDeclare);
+        rewriter.insertBefore(ctx.getStart(), coverageDataConfig.getCoverageDeclare());
     }
 
     private void instrumentCoverageEnd(ParserRuleContext ctx) {
-        rewriter.insertAfter(ctx.getStop(), coverageEnd);
+        rewriter.insertAfter(ctx.getStop(), coverageDataConfig.getCoverageEnd());
     }
 
-    private void instrumentCoverageStatementIncrement(ParserRuleContext ctx) {
-        rewriter.insertBefore(ctx.getStart(), coverageStatementIncrementor);
+    private void instrumentCoverageStatementIncrement(ParserRuleContext ctx, int seq) {
+        rewriter.insertBefore(ctx.getStart(), coverageDataConfig.getCoverageStatementIncrementor(seq));
     }
 
-    private void instrumentCoverageBranchIncrement(ParserRuleContext ctx) {
-        rewriter.insertBefore(ctx.getStart(), coverageBranchIncrementor);
+    private void instrumentCoverageBranchIncrement(ParserRuleContext ctx, int seq, boolean isBefore) {
+        if (isBefore)
+                rewriter.insertBefore(ctx.getStart(), coverageDataConfig.getCoverageBranchIncrementor(seq, isBefore));
+         else
+             rewriter.insertAfter(ctx.getStart(), coverageDataConfig.getCoverageBranchIncrementor(seq, isBefore));
     }
 
     @Override
@@ -52,30 +49,36 @@ public class InstrumentListner extends PlSqlParserBaseListener {
     @Override
     public void enterUnit_statement(PlSqlParser.Unit_statementContext ctx) {
         super.enterUnit_statement(ctx);
-        instrumentCoverageStatementIncrement(ctx);
+        //todo: row,col ???
+        int seq = coverageDataConfig.addStatement(ctx.start.getLine(), ctx.start.getCharPositionInLine());
+        instrumentCoverageStatementIncrement(ctx, seq);
     }
 
     @Override
     public void enterStatement(PlSqlParser.StatementContext ctx) {
         super.enterStatement(ctx);
-        instrumentCoverageStatementIncrement(ctx);
+        int seq = coverageDataConfig.addStatement(ctx.start.getLine(), ctx.start.getCharPositionInLine());
+        instrumentCoverageStatementIncrement(ctx, seq);
     }
 
     @Override
     public void enterIf_statement(PlSqlParser.If_statementContext ctx) {
         super.enterIf_statement(ctx);
-        instrumentCoverageBranchIncrement(ctx);
+        int seq = coverageDataConfig.addBranch(ctx.start.getLine(), ctx.start.getCharPositionInLine());
+        instrumentCoverageBranchIncrement(ctx, seq, true);
     }
 
     @Override
     public void enterElsif_part(PlSqlParser.Elsif_partContext ctx) {
         super.enterElsif_part(ctx);
-        instrumentCoverageBranchIncrement(ctx);
+        int seq = coverageDataConfig.addBranch(ctx.start.getLine(), ctx.start.getCharPositionInLine());
+        instrumentCoverageBranchIncrement(ctx, seq,false);
     }
 
     @Override
     public void enterElse_part(PlSqlParser.Else_partContext ctx) {
         super.enterElse_part(ctx);
-        instrumentCoverageBranchIncrement(ctx);
+        int seq = coverageDataConfig.addBranch(ctx.start.getLine(), ctx.start.getCharPositionInLine());
+        instrumentCoverageBranchIncrement(ctx, seq,false);
     }
 }
