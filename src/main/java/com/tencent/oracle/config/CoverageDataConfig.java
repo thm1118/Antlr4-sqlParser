@@ -1,16 +1,13 @@
 package com.tencent.oracle.config;
 
-import org.antlr.v4.runtime.Token;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.ArrayList;
 
 public class CoverageDataConfig {
-    // todo: 这里为了演示插桩用了文字，需要设计 覆盖率数据声明头，结尾，增量计数器（语句、分支、函数（含存储过程、触发器等））
     /**
      *  注入的头，需要 对所有 行覆盖和分支覆盖数据的初始化
      * */
-    private  final String coverageDeclareTemplate = "DECLARE\n" +
+    private  final String coverageDeclareTemplate =
+            "DECLARE\n" +
             "  -- 定义单个语句（或分支）的覆盖率 record 数据结构\n" +
             "  TYPE t_cov_rec_type IS RECORD (id_row INTEGER,id_col INTEGER, exc_count INTEGER default 0);\n" +
             "  -- 定义 存储多个 语句覆盖率的 table 数据结构\n" +
@@ -20,13 +17,14 @@ public class CoverageDataConfig {
             "  -- 初始化 语句覆盖率的 table\n" +
             "  statements_cov_tab t_statements_cov_tab_type;\n" +
             "  branches_cov_tab t_branches_cov_tab_type;\n" +
-            "  -- 初始化tabel中的每个语句和分支" +
+            "  -- 初始化tabel中的每个语句和分支 \n" +
             "  %s \n " + // 这里注入 所有 行覆盖和分支覆盖数据的初始化；
             "BEGIN\n";
     /**
      * 注入的 尾： todo： 需要对收集的数据 存放到 物理表/或 发送至 远程服务
      * */
-    private final String  coverageEndTemplate = "\n  -- 输出结果\n" +
+    private final String  coverageEndTemplate =
+            "\n  -- 输出结果\n" +
             "   dbms_output.put_line('语句覆盖率情况：');\n" +
             "   FOR i IN statements_cov_tab.first .. statements_cov_tab.last\n" +
             "   LOOP\n" +
@@ -64,15 +62,8 @@ public class CoverageDataConfig {
     /**
      * 单条分支覆盖收集器模板
      * */
-    private final String coverageBranchBeforeIncrementor =
+    private final String coverageBranchIncrementor =
             " \nbranches_cov_tab(%d).exc_count := branches_cov_tab(%d).exc_count + 1; \n";
-
-    /**
-     * 单条分支覆盖收集器模板
-     * */
-    private final String coverageBranchAfterIncrementor =
-            " \n(branches_cov_tab(%d).exc_count := branches_cov_tab(%d).exc_count + 1) AND \n";
-
 
 
     private String getCoverageStatementIncrementorInit(CovData covData){
@@ -141,10 +132,8 @@ public class CoverageDataConfig {
     /**
      * 获取用来 单条分支覆盖率收集器
      * */
-    public String getCoverageBranchIncrementor(int seq,boolean isBefore){
-        if (isBefore)
-            return String.format(coverageBranchBeforeIncrementor, seq, seq);
-        else return String.format(coverageBranchAfterIncrementor, seq, seq);
+    public String getCoverageBranchIncrementor(int seq){
+         return String.format(coverageBranchIncrementor, seq, seq);
     }
 
     /*

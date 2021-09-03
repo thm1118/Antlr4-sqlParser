@@ -1,15 +1,8 @@
 package com.tencent.oracle;
 
-import com.google.common.io.Resources;
-import org.junit.Ignore;
 import org.junit.Test;
-
 import java.io.IOException;
-import com.google.common.io.Resources;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -18,75 +11,87 @@ import static org.junit.Assert.assertTrue;
  * **/
 public class InstrumentStatementTest {
 
-    // String sql = readResource("ifelse.sql");
-    private static String readResource(String name)
-            throws IOException
-    {
-        return Resources.toString(Resources.getResource("oracle/"+name), UTF_8);
-    }
 
-    private static int count(String str, String target) {
-        return (str.length() - str.replace(target, "").length()) / target.length();
-    }
+
 
     @Test
-    public void shouldInstrumentAssignStatement(){
+    public void shouldInstrumentAssignStatement() throws IOException {
         Instrument instrument;
-        String sql = "sal_raise := .08;";
+        String sql = Util.readResource("assign_statement.sql");
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+
+        int assign_statementIndex = rows.indexOf("SAL_RAISE := .08;\r");
+        assertTrue(assign_statementIndex >0);
+        assertEquals("statements_cov_tab(2).exc_count := statements_cov_tab(2).exc_count + 1;",
+                rows.get(assign_statementIndex - 1).trim());
     }
 
+
     @Test
-    public void shouldInstrumentDeclareVariableStatement(){
+    public void shouldInstrumentDeclareVariableStatement() throws IOException {
         Instrument instrument;
-        String sql = "DECLARE\n" +
-                "   jobid      employees.job_id%TYPE;";
+        String sql = Util.readResource("declare.sql");
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        int declare_statementIndex = rows.indexOf("DECLARE\r");
+        assertTrue(declare_statementIndex > 0);
+        assertEquals("statements_cov_tab(1).exc_count := statements_cov_tab(1).exc_count + 1;",
+                rows.get(declare_statementIndex - 1).trim());
     }
 
     @Test
     public void shouldInstrumentIFStatement() throws IOException {
         Instrument instrument;
-        String sql = "BEGIN \n" +
-                "IF jobid = 'PU_CLERK' THEN sal_raise := .09;\n " +
-                " END IF;"+
-                "END; \n";
+        String sql = Util.readResource("if.sql");
         instrument = new Instrument(sql);
         String result = instrument.getInstrumentSQL();
-//        assertTrue(result.contains(Instrument.coverageBranchIncrementor));
-//        assertEquals(count(result, Instrument.coverageBranchIncrementor), 1);
+        List<String> rows = Util.splitToLines(result);
+        int if_statementIndex = rows.indexOf("IF JOB_ID = 1 THEN ");
+        assertTrue(if_statementIndex > 0);
+        assertEquals("statements_cov_tab(2).exc_count := statements_cov_tab(2).exc_count + 1;",
+                rows.get(if_statementIndex - 1).trim());
+        assertEquals("branches_cov_tab(1).exc_count := branches_cov_tab(1).exc_count + 1;",
+                rows.get(if_statementIndex + 1).trim());
 
     }
 
     @Test
-    public void shouldInstrumentElseStatement(){
+    public void shouldInstrumentElseStatement() throws IOException {
         Instrument instrument;
-        String sql = "BEGIN \n" +
-                "IF jobid = 'PU_CLERK' THEN sal_raise := .09; \n " +
-                "ELSE sal_raise := 0; \n " +
-                "END IF;"+
-                "END; \n";
+        String sql = Util.readResource("if_else.sql");
         instrument = new Instrument(sql);
         String result = instrument.getInstrumentSQL();
-        //todo: 应 包含 2 个 coverageBranchIncrementor；
-//        assertEquals(count(result, Instrument.coverageBranchIncrementor), 2);
+        List<String> rows = Util.splitToLines(result);
+
+        int Else_statementIndex = rows.indexOf("    ELSE ");
+        assertTrue(Else_statementIndex > 0);
+        assertEquals("branches_cov_tab(2).exc_count := branches_cov_tab(2).exc_count + 1;",
+                rows.get(Else_statementIndex + 1).trim());
+        assertEquals("statements_cov_tab(4).exc_count := statements_cov_tab(4).exc_count + 1;",
+                rows.get(Else_statementIndex + 4).trim());
     }
 
     @Test
-    public void shouldInstrumentElseIfStatement(){
+    public void shouldInstrumentElseIfStatement() throws IOException {
         Instrument instrument;
-        String sql ="BEGIN \n" +
-                "IF jobid = 'PU_CLERK' THEN sal_raise := .09; \n" +
-                " ELSIF jobid = 'SH_CLERK' THEN sal_raise := .08; \n " +
-                "END IF;"+
-                "END; \n";
+        String sql = Util.readResource("if_elseif.sql");
         instrument = new Instrument(sql);
         String result = instrument.getInstrumentSQL();
-//        assertEquals(count(result, Instrument.coverageBranchIncrementor), 3);
+        List<String> rows = Util.splitToLines(result);
+
+        int ElseIf_statementIndex = rows.indexOf("    ELSIF JOBID = 'SH_CLERK' THEN ");
+        assertTrue(ElseIf_statementIndex > 0);
+        assertEquals("branches_cov_tab(2).exc_count := branches_cov_tab(2).exc_count + 1;",
+                rows.get(ElseIf_statementIndex + 1).trim());
+        assertEquals("statements_cov_tab(5).exc_count := statements_cov_tab(5).exc_count + 1;",
+                rows.get(ElseIf_statementIndex + 4).trim());
+        assertEquals("branches_cov_tab(3).exc_count := branches_cov_tab(3).exc_count + 1;",
+                rows.get(ElseIf_statementIndex + 7).trim());
+        assertEquals("branches_cov_tab(4).exc_count := branches_cov_tab(4).exc_count + 1;",
+                rows.get(ElseIf_statementIndex + 12).trim());
     }
 
 }

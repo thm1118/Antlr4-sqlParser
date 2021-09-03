@@ -1,9 +1,8 @@
 package com.tencent.oracle;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
+import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 /**
  * 验证 所有DDL，DML 等 语句 的正确插桩
@@ -31,8 +30,10 @@ public class InstrumentUnitStatementTest {
                 "   TABLESPACE admin_tbs\n" +
                 "   STORAGE ( INITIAL 50K); ";
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 
     @Test
@@ -46,8 +47,10 @@ public class InstrumentUnitStatementTest {
                 "   tot_emps := tot_emps - 1;\n" +
                 "   END; ";
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 
     @Test
@@ -64,8 +67,10 @@ public class InstrumentUnitStatementTest {
                 "      RETURN(acc_bal); \n" +
                 "    END; ";
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 
     // -------------- DML 语句 ----------------------
@@ -75,8 +80,10 @@ public class InstrumentUnitStatementTest {
         Instrument instrument;
         String sql = "select   *  from\n foo\n  order by x ; ";
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 
     @Test
@@ -85,8 +92,10 @@ public class InstrumentUnitStatementTest {
         String sql = "INSERT INTO bonus SELECT ename, job, sal, comm FROM emp\n" +
                 "   WHERE comm > sal * 0.25; ";
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 
     @Test
@@ -96,8 +105,10 @@ public class InstrumentUnitStatementTest {
                 "      (SELECT first_name, last_name FROM employees\n" +
                 "         WHERE employee_id = e1.employee_id);";
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 
     @Test
@@ -105,7 +116,9 @@ public class InstrumentUnitStatementTest {
         Instrument instrument;
         String sql = "DELETE FROM bonus WHERE sales_amt < quota;";
         instrument = new Instrument(sql);
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare +
-//                Instrument.coverageStatementIncrementor));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 }

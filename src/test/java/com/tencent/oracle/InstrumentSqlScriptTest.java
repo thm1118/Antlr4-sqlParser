@@ -2,6 +2,10 @@ package com.tencent.oracle;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -19,7 +23,10 @@ public class InstrumentSqlScriptTest {
 
     @Test
     public void shouldInstrumentHeadAndTail(){
-//        assertTrue(instrument.getInstrumentSQL().startsWith(Instrument.coverageDeclare));
-//        assertTrue(instrument.getInstrumentSQL().endsWith(Instrument.coverageEnd));
+        String result = instrument.getInstrumentSQL();
+        List<String> rows = Util.splitToLines(result);
+
+        assertEquals(11, rows.indexOf("  statements_cov_tab(1).id_row := 1;"));
+        assertEquals(12, rows.indexOf("statements_cov_tab(1).id_col := 0; "));
     }
 }
