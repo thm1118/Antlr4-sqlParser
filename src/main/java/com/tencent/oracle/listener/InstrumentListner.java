@@ -7,7 +7,6 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 import com.tencent.oracle.out.PlSqlParser;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 
 public class InstrumentListner extends PlSqlParserBaseListener {

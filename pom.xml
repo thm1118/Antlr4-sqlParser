@@ -140,6 +140,9 @@
                 </executions>
                 <configuration>
                     <skip>false</skip>
+<!--                    <includes>-->
+<!--                        <type>com.tencent.oracle.*</type>-->
+<!--                    </includes>-->
                 </configuration>
             </plugin>
 
