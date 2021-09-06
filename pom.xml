@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.lcc</groupId>
-    <artifactId>ANTLR4-SqlBase</artifactId>
+    <artifactId>sql-coverage_tool</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
