@@ -47,6 +47,21 @@ public class InstrumentListner extends PlSqlParserBaseListener {
         super.exitSql_script(ctx);
         instrumentCoverageDeclare(ctx);
         instrumentCoverageEnd(ctx);
+        // todo: 还需要汇总 总共有多少 行、语句，分支，这样才能有 百分比覆盖率的基数
+        /*
+         *  const empty = () => ({
+         *         total: 0,
+         *         covered: 0,
+         *         skipped: 0,
+         *         pct: 'Unknown'
+         *     });
+         *
+         *     return {
+         *         lines: empty(),
+         *         statements: empty(),
+         *         functions: empty(),
+         *         branches: empty()
+         * */
     }
 
     @Override

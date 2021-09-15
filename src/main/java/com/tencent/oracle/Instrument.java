@@ -14,6 +14,9 @@ public class Instrument {
 
     private final InstrumentListner instrumentor;
 
+    /**
+     * todo： 需要增加 唯一id标识，用于标识 一个 文件，或 一段SQL。语言覆盖率工具中，通常对应一个 文件的 全路径，这样能用于显示报表。
+     * */
     public Instrument(String originalSQL) {
         CharStream input = CharStreams.fromString(originalSQL.toUpperCase());
         PlSqlLexer lexer = new PlSqlLexer(input);
